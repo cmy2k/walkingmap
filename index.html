@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Walking to Sonoma</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+  <style>
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  html, body, #map {
+    height: 100%;
+  }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+  <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script>
+  var mapLink = '&copy; <a href="http://www.esri.com/">Esri</a>',
+      maxZoom = 12;
+
+    // base layers
+    var imagery = L.tileLayer(
+      'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: mapLink,
+        maxZoom: maxZoom
+    });
+
+    var streets = L.tileLayer(
+      'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: mapLink,
+        maxZoom: maxZoom
+    });
+
+    // walking path, set up map
+    $.getJSON('http://geowalk.s3-website-us-east-1.amazonaws.com/path.geojson', function(data) {
+      var path = L.geoJson(data, {
+        style: function(feature){
+          return { color: '#000000'}
+        }
+      });
+
+      var map = L.map('map', {
+        center: [35.57, -82.53],
+        maxZoom: 12,
+        minZoom: 6,
+        zoom: 8,
+        layers: [streets]
+      });
+
+      L.control.layers({
+        'Street Map': streets,
+        'Imagery': imagery
+      },{
+        'Path to Sonoma': path
+      }).addTo(map);
+    });
+    </script>
+  </body>
+  </html>
