@@ -19,9 +19,12 @@
 <body>
   <div id="map"></div>
 
-  <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
-  <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.3.1/lodash.min.js"></script>
+  <script type="text/javascript" src="leaflet.geometryutil.js"></script>
   <script>
+
   var mapLink = '&copy; <a href="http://www.esri.com/">Esri</a>',
       maxZoom = 12;
 
@@ -39,28 +42,58 @@
     });
 
     // walking path, set up map
-    $.getJSON('path.geojson', function(data) {
-      var path = L.geoJson(data, {
+    $.when(
+      $.getJSON('/path.geojson'),
+      $.getJSON('/legs.json')
+    ).then(function(path, legs) {
+      var pathLayer = L.geoJson(path, {
         style: function(feature){
           return { color: '#000000'}
         }
       });
 
       var map = L.map('map', {
-        center: [35.57, -82.53],
+        center: [35.57, -82.73],
         maxZoom: 12,
-        minZoom: 6,
-        zoom: 8,
+        minZoom: 5,
+        zoom: 11,
         layers: [streets]
       });
 
-      L.control.layers({
+      var layersControl = L.control.layers({
         'Street Map': streets,
         'Imagery': imagery
       },{
-        'Path to Sonoma': path
+        'Path to Sonoma': pathLayer
       }).addTo(map);
+
+      map.addLayer(pathLayer);
+
+      // calculate coordiantes
+      var coordinates = [];
+      var polypath = L.polyline(path[0].features[0].geometry.coordinates);
+      var length = L.GeometryUtil.length(polypath) * 0.0000621371;
+
+      var distance = 0;
+      _.forEach(legs[0], function(leg) {
+        if (leg.dist !== 0) {
+          distance += leg.dist;
+          var ratio = distance / length;
+          var location = L.GeometryUtil.interpolateOnLine(map, polypath, ratio).latLng;
+          var marker = L.marker([location.lng, location.lat]);
+          marker.bindPopup("<b>" + leg.date + "</b><br>Distance: " + leg.dist + " miles<br>Calories burned: " + leg.cals)
+          marker.addTo(map);
+        }
+      });
+
+      console.log( distance );
+
+      //var marker = L.marker([35.600839, -82.554085]).addTo(map);
+
+      //layersControl._update();
     });
+
+      
     </script>
   </body>
   </html>
