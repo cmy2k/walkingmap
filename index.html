@@ -39,7 +39,7 @@
     });
 
     // walking path, set up map
-    $.getJSON('http://geowalk.s3-website-us-east-1.amazonaws.com/path.geojson', function(data) {
+    $.getJSON('path.geojson', function(data) {
       var path = L.geoJson(data, {
         style: function(feature){
           return { color: '#000000'}
