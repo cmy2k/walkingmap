@@ -43,8 +43,8 @@
 
     // walking path, set up map
     $.when(
-      $.getJSON('/path.geojson'),
-      $.getJSON('/legs.json')
+      $.getJSON('path.geojson'),
+      $.getJSON('legs.json')
     ).then(function(path, legs) {
       var pathLayer = L.geoJson(path, {
         style: function(feature){
