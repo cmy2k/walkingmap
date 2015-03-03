@@ -6,94 +6,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
   <style>
-  body {
-    padding: 0;
-    margin: 0;
-  }
+    body {
+      padding: 0;
+      margin: 0;
+    }
 
-  html, body, #map {
-    height: 100%;
-  }
+    html, body, #map {
+      height: 100%;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-
   <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
   <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.3.1/lodash.min.js"></script>
   <script type="text/javascript" src="leaflet.geometryutil.js"></script>
+  <script type="text/javascript" src="geo.js"></script>
   <script>
+    var mapLink = '&copy; <a href="http://www.esri.com/">Esri</a>',
+        maxZoom = 12;
 
-  var mapLink = '&copy; <a href="http://www.esri.com/">Esri</a>',
-      maxZoom = 12;
-
-    // base layers
-    var imagery = L.tileLayer(
-      'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: mapLink,
-        maxZoom: maxZoom
-    });
-
-    var streets = L.tileLayer(
-      'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: mapLink,
-        maxZoom: maxZoom
-    });
-
-    // walking path, set up map
-    $.when(
-      $.getJSON('path.geojson'),
-      $.getJSON('legs.json')
-    ).then(function(path, legs) {
-      var pathLayer = L.geoJson(path, {
-        style: function(feature){
-          return { color: '#000000'}
-        }
+      // base layers
+      var imagery = L.tileLayer(
+        'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: mapLink,
+          maxZoom: maxZoom
       });
 
-      var map = L.map('map', {
-        center: [35.57, -82.73],
-        maxZoom: 12,
-        minZoom: 5,
-        zoom: 11,
-        layers: [streets]
+      var streets = L.tileLayer(
+        'http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: mapLink,
+          maxZoom: maxZoom
       });
 
-      var layersControl = L.control.layers({
-        'Street Map': streets,
-        'Imagery': imagery
-      },{
-        'Path to Sonoma': pathLayer
-      }).addTo(map);
+      // walking path, set up map
+      $.when(
+        $.getJSON('path.geojson'),
+        $.getJSON('legs.json')
+      ).then(function(path, legs) {
+        var pathLayer = L.geoJson(path, {
+          style: function(feature){
+            return { color: '#000000'}
+          }
+        });
 
-      map.addLayer(pathLayer);
+        var map = L.map('map', {
+          center: [35.57, -82.73],
+          maxZoom: 12,
+          minZoom: 5,
+          zoom: 11,
+          layers: [streets]
+        });
 
-      // calculate coordiantes
-      var coordinates = [];
-      var polypath = L.polyline(path[0].features[0].geometry.coordinates);
-      var length = L.GeometryUtil.length(polypath) * 0.0000621371;
+        var layersControl = L.control.layers({
+          'Street Map': streets,
+          'Imagery': imagery
+        },{
+          'Path to Sonoma': pathLayer
+        }).addTo(map);
 
-      var distance = 0;
-      _.forEach(legs[0], function(leg) {
-        if (leg.dist !== 0) {
-          distance += leg.dist;
-          var ratio = distance / length;
-          var location = L.GeometryUtil.interpolateOnLine(map, polypath, ratio).latLng;
-          var marker = L.marker([location.lng, location.lat]);
-          marker.bindPopup("<b>" + leg.date + "</b><br>Distance: " + leg.dist + " miles<br>Calories burned: " + leg.cals)
+        map.addLayer(pathLayer);
+
+        var markers = makeMarkersFromLegs(path, legs, map);
+        _.forEach(markers, function(marker) {
           marker.addTo(map);
-        }
+        });
+
+        map.panTo(_.last(markers).getLatLng());
+
       });
-
-      console.log( distance );
-
-      //var marker = L.marker([35.600839, -82.554085]).addTo(map);
-
-      //layersControl._update();
-    });
-
-      
     </script>
   </body>
   </html>
