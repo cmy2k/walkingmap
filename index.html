@@ -5,6 +5,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+  <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <link rel="stylesheet" href="vendor/leaflet.awesome-markers.css" />
   <style>
     body {
       padding: 0;
@@ -14,6 +16,11 @@
     html, body, #map {
       height: 100%;
     }
+
+    .awesome-marker i {
+      font-size: 18px;
+      padding-left: 1px;
+    }
   </style>
 </head>
 <body>
@@ -21,7 +28,8 @@
   <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
   <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.3.1/lodash.min.js"></script>
-  <script type="text/javascript" src="leaflet.geometryutil.js"></script>
+  <script type="text/javascript" src="vendor/leaflet.geometryutil.js"></script>
+  <script type="text/javascript" src="vendor/leaflet.awesome-markers.min.js"></script>
   <script type="text/javascript" src="geo.js"></script>
   <script>
     var mapLink = '&copy; <a href="http://www.esri.com/">Esri</a>',
